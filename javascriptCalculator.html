@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+        <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+        <title>Javascript Calculator</title>
+        <link rel="stylesheet" href="javascriptCalculator.css">
+    </head>
+    <body>
+        <div id="app">
+        </div>
+        <!-- // Access to XMLHttpRequest at 'file:///D:/Programming/freeCodeCamp/Front%20End%20Libraries%20Certification/prjs/25+5Clock/255Clock.js' from origin 'null' has been blocked by CORS policy: Cross origin requests are only supported for protocol schemes: http, data, chrome, chrome-extension, chrome-untrusted, https.
+        Chrome only accepts src in https form, but not from local.
+        <script type="text/babel" src="255Clock.js"></script>   -->
+
+        <script type="text/babel">
+                
+        class Buttons extends React.Component {
+
+        render() {
+        const { topDisplay, bottomDisplay, del, clear, appendInput, handleEqual, appendDot } = this.props
+        return (
+            <div className='calculator-grid'>
+            <div className='display' id='display'>
+                {bottomDisplay}
+            </div>
+            <input 
+                type='button' 
+                className='span-two' 
+                id='clear' 
+                value='AC'
+                onClick={clear} 
+                />
+            <input 
+                type='button' 
+                value='DEL'
+                onClick={del} 
+                />
+            <input 
+                type='button' 
+                id='divide' 
+                value='/'
+                onClick={appendInput} 
+                />
+            <input 
+                type='button' 
+                id='one'
+                value='1' 
+                onClick={appendInput} 
+                />
+            <input 
+                type='button' 
+                id='two'
+                value='2'
+                onClick={appendInput} 
+                />
+            <input 
+                type='button' 
+                id='three'
+                value='3'
+                onClick={appendInput} 
+                />
+            <input 
+                type='button' 
+                id='multiply'
+                value='X'
+                onClick={appendInput} 
+                />
+            <input 
+                type='button' 
+                id='four'
+                value='4'
+                onClick={appendInput} 
+                />
+            <input 
+                type='button' 
+                id='five'
+                value='5'
+                onClick={appendInput} 
+                />
+            <input 
+                type='button' 
+                id='six'
+                value='6'
+                onClick={appendInput} 
+                />
+            <input 
+                type='button' 
+                id='add'
+                value='+'
+                onClick={appendInput} 
+                />
+            <input 
+                type='button' 
+                id='seven'
+                value='7'
+                onClick={appendInput} 
+                />
+            <input 
+                type='button' 
+                id='eight'
+                value='8'
+                onClick={appendInput} 
+                />
+            <input 
+                type='button' 
+                id='nine'
+                value='9'
+                onClick={appendInput} 
+                />
+            <input 
+                type='button' 
+                id='subtract'
+                value='-'
+                onClick={appendInput} 
+                />
+            <input 
+                type='button' 
+                id='decimal'
+                value='.'
+                onClick={appendDot} 
+                />
+            <input 
+                type='button' 
+                id='zero'
+                value='0'
+                onClick={appendInput} 
+                />
+            <input 
+                type='button' 
+                id='equals'
+                className='span-two'
+                value='='
+                onClick={handleEqual}
+                />
+            </div>
+
+        )
+        }
+        }
+
+        class Calculator extends React.Component {
+        constructor(props) {
+        super(props)
+        this.state = {
+            topDisplay: 0,
+            bottomDisplay: 0,
+            prevsInput: ""
+        }
+        }
+
+        appendInput = event => {
+        const { bottomDisplay, prevsInput } = this.state
+        const value = event.target.value
+        // 此時 typeof(topDisplay) 是 number
+        // [...topDisplay.toString()] 把 topDisplay 轉成 array
+        if ([...bottomDisplay.toString()].length <= 1 
+            && bottomDisplay.toString()[0] === "0") {
+            this.setState(prevstate => ({
+            bottomDisplay: value.toString(),
+            prevsInput: value.toString()
+            }))
+            return;
+        }
+        this.setState(prevstate => ({
+            bottomDisplay: bottomDisplay.toString() + value.toString().replace(/X/g, '*'),
+            prevsInput: value.toString()
+        }))
+        }
+
+        appendDot = event => {
+        const { bottomDisplay, prevsInput } = this.state
+        const value = event.target.value
+        console.log(prevsInput)
+        const fourOperationRegex = /[*/+-]/
+        const dotRegex = /\./
+        const disallowRegex = /\d+\.\d*$/
+
+        // for cases where "0" is pressed first and then press dot(.)
+        if ([...bottomDisplay.toString()].length <= 1 
+            && prevsInput.toString() === '0') {
+            this.setState({
+            bottomDisplay: prevsInput.toString() + value.toString(),
+            prevsInput: value
+            })
+            return;
+        }
+        // for cases where /[*/+-]/ buttons are pressed first 
+        // and then (.)button is pressed.
+        // Inserting "0" before ".(dot)"
+        // For example: "+.9" ===> "+0.9" 
+        if (fourOperationRegex.test(prevsInput.toString())) {
+            this.setState({
+            bottomDisplay: bottomDisplay.toString() + "0" + value.toString(),
+            prevsInput: value
+            })
+            return;
+        }
+        // 1. for cases where "."(dot) button is pressed consecitovely.
+        // 2. FCC requests:
+        // An input of "5.5.5" should display 5.55 : expected '5.5.5' to equal '5.55'
+        if (dotRegex.test(prevsInput.toString()) 
+            || disallowRegex.test(bottomDisplay.toString())) {
+            this.setState({
+            bottomDisplay: bottomDisplay.toString(),
+            prevsInput: value
+            })
+            return;
+        }
+
+        // for general cases, just append dot(.) whenever (.)button is pressed.
+        this.setState(prevstate => ({
+            bottomDisplay: bottomDisplay.toString() + value.toString(),
+            prevsInput: value
+        }))
+
+        }
+
+        handleEqual = () => {
+        const { bottomDisplay } = this.state
+        const mulRegex = /(-?\d+(\.\d+)?)\*(-?\d+(\.\d+)?)/
+        const divRegex = /(-?\d+(\.\d+)?)\/(-?\d+(\.\d+)?)/
+        const addRegex = /(-?\d+(\.\d+)?)\+(-?\d+(\.\d+)?)/
+        const subRegex = /(-?\d+(\.\d+)?)\-(-?\d+(\.\d+)?)/
+
+        // FCC Request: 
+        // If 2 or more operators are entered consecutively, 
+        // the operation performed should be the last operator entered 
+        // (excluding the negative (-) sign.
+        // The sequence "5 * - + 5" = should produce an output of "10"
+        const fccRegex = /(-?\d+(\.\d+)?)[*/+-]{1,}([*/+-])(-?\d+(\.\d+)?)/
+
+        let equation = bottomDisplay.toString();
+
+        const mulReplacer = (match, p1, p2, p3, offset, string) => {
+            let output = parseFloat(p1) * parseFloat(p3)
+            // rouding to 4 decimal places
+            return Math.round(10000 * output) / 10000
+        }
+        const divReplacer = (match, p1, p2, p3, offset, string) => {
+            let output = parseFloat(p1) / parseFloat(p3)
+            return Math.round(10000 * output) / 10000
+        }
+        const addReplacer = (match, p1, p2, p3, offset, string) => {
+            let output = parseFloat(p1) + parseFloat(p3)
+            return Math.round(10000 * output) / 10000
+        }
+        const subReplacer = (match, p1, p2, p3, offset, string) => {
+            let output = parseFloat(p1) - parseFloat(p3)
+            return Math.round(10000 * output) / 10000
+        }
+
+        // For FCC Request: The sequence "5 * - + 5" = should produce an output of "10"
+        const fccReplacer = (match, p1, p2, p3, p4, p5, offset, string) => {
+            let output;
+            switch(p3) {
+            case '*':
+                output = parseFloat(p1) * parseFloat(p4)
+                break;
+            case '/':
+                output = parseFloat(p1) / parseFloat(p4)
+                break;
+            case '+':
+                output = parseFloat(p1) + parseFloat(p4)
+                break;
+            case '-':
+                output = parseFloat(p1) - parseFloat(p4)
+                break;
+            default:
+                output = null
+            }
+            return Math.round(10000 * output) / 10000
+        }
+
+        while (mulRegex.test(equation)) {
+            equation = equation.replace(mulRegex, mulReplacer)
+        }
+        while (divRegex.test(equation)) {
+            equation = equation.replace(divRegex, divReplacer)
+        }
+        while (addRegex.test(equation)) {
+            equation = equation.replace(addRegex, addReplacer)
+        }
+        while (subRegex.test(equation)) {
+            equation = equation.replace(subRegex, subReplacer)
+        }
+        // For FCC Request
+        while (fccRegex.test(equation)) {
+            equation = equation.replace(fccRegex, fccReplacer)
+        }
+
+        this.setState(prevstate => ({
+            bottomDisplay: equation
+        }))
+        }
+
+        clear = () => {
+        this.setState({
+            topDisplay: 0,
+            bottomDisplay: 0,
+            prevsInput: ""
+        })
+        }
+
+        del = () => {
+        const { bottomDisplay } = this.state
+        // 此時 typeof(topDisplay) 是 number
+        // [...topDisplay.toString()] 把 topDisplay 轉成 array
+        if ( [...bottomDisplay.toString()].length <= 1) {
+            this.setState(prevstate => ({
+            bottompDisplay: 0
+            }))
+            return;
+        }
+        this.setState(prevstate => {
+            // 把 string 轉變成 array
+            const displayArray = [...bottomDisplay.toString()]    
+            // Option 1
+            // string.split('');
+
+            // // Option 2
+            // [...string];
+
+            // // Option 3
+            // Array.from(string);
+
+            // // Option 4
+            // Object.assign([], string);
+
+            // 可以用 splice() 或是 pop() 剔除最高 element
+            // display.splice(display.length - 1, 1);
+            displayArray.pop();
+            console.log(displayArray)
+            // 再將 display 從 array 轉回 string
+            const displayString = displayArray.toString().replace(/,/g, '')
+            return {
+            bottomDisplay: displayString
+            }
+        })
+        }
+
+
+        render() {
+        return (
+            <div className='container'>
+            <Buttons 
+                appendInput={this.appendInput} 
+                topDisplay={this.state.topDisplay}
+                bottomDisplay={this.state.bottomDisplay}
+                clear={this.clear}
+                del={this.del}
+                handleEqual={this.handleEqual}
+                appendDot={this.appendDot}
+                />
+            </div>
+        )
+        }
+        }
+
+        ReactDOM.render(
+        <Calculator />,
+        document.getElementById('app')
+        );
+        </script>        
+    </body> 
+</html>
